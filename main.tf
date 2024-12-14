@@ -97,3 +97,34 @@ resource "aws_s3_bucket_acl" "example" {
   bucket = aws_s3_bucket.example.id
   acl    = "public-read"
 }
+
+# here I'm creating linux instance
+provider "aws" {
+  region = "us-east-1" # Replace with your desired region
+}
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-2*-x86_64-gp2"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["137112412989"]
+}
+
+resource "aws_instance" "web" {
+  ami           = ami-0e2c8caa4b6378d8c #data.aws_ami.amazon_linux.id
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.sub1.id
+  vpc_security_group_ids = [aws_security_group.allow_all.id]
+
+  tags = {
+    Name = "HelloWorld"
+  }
+}
